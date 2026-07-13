@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="min-h-screen bg-black text-white p-6 flex flex-col justify-between">
+    <!-- Cabeçalho -->
+    <header class="flex justify-between items-center border-b border-gray-800 pb-4 mb-6">
+        <h1 class="text-4xl font-black tracking-wider text-yellow-400">PEDIDOS DA BARRACA LANCHES</h1>
+        <div class="text-xl text-gray-400" id="relogio">00:00:00</div>
+    </header>
+
+    <!-- Conteúdo Principal em 3 Colunas -->
+    <div class="grid grid-cols-12 gap-6 flex-1">
+        
+        <!-- Coluna 1: ÚLTIMO PRONTO (Destaque Gigante) - 5 Colunas -->
+        <div class="col-span-5 bg-gradient-to-br from-green-600 to-green-800 rounded-2xl p-6 flex flex-col justify-center items-center shadow-2xl border-4 border-green-400 text-center">
+            <span class="text-3xl font-bold uppercase tracking-widest text-green-200 mb-2">Pronto para Retirada!</span>
+            <div id="destaque-senha" class="text-9xl font-black my-4 text-white drop-shadow-lg">--</div>
+            <div id="destaque-cliente" class="text-3xl font-semibold text-green-100 truncate max-w-full">Aguardando...</div>
+        </div>
+
+        <!-- Coluna 2: EM PREPARAÇÃO - 3 Colunas -->
+        <div class="col-span-3 bg-gray-800 rounded-2xl p-6 border border-gray-700 flex flex-col">
+            <h2 class="text-2xl font-bold text-yellow-400 border-b border-gray-700 pb-3 mb-4 text-center">Em Preparo</h2>
+            <div id="lista-preparacao" class="flex-1 overflow-hidden space-y-3">
+                <!-- Preenchido via JS -->
+            </div>
+        </div>
+
+        <!-- Coluna 3: ÚLTIMOS 10 FINALIZADOS - 4 Colunas -->
+        <div class="col-span-4 bg-gray-800 rounded-2xl p-6 border border-gray-700 flex flex-col">
+            <h2 class="text-2xl font-bold text-green-400 border-b border-gray-700 pb-3 mb-4 text-center">Últimos Prontos</h2>
+            <div id="lista-ultimos" class="grid grid-cols-2 gap-3 flex-1 overflow-hidden content-start">
+                <!-- Preenchido via JS -->
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Rodapé -->
+    <footer class="mt-6 text-center text-gray-500 text-sm border-t border-gray-800 pt-3">
+        Sistema Barraca Lanches Januária
+    </footer>
+</div>
+
+<script>
+    // Atualiza o relógio da TV
+    setInterval(() => {
+        const now = new Date();
+        document.getElementById('relogio').innerText = now.toLocaleTimeString('pt-BR');
+    }, 1000);
+
+    // Consulta a API e atualiza a tela sem recarregar a página (economia de RAM na TV Box)
+    async function atualizarPainel() {
+        try {
+            const response = await fetch('/api/painel_dados');
+            const dados = await response.json();
+
+            // 1. Atualizar Destaque
+            const elSenha = document.getElementById('destaque-senha');
+            const elCliente = document.getElementById('destaque-cliente');
+            if (dados.ultimo_pronto) {
+                elSenha.innerText = String(dados.ultimo_pronto.senha).padStart(3, '0');
+                elCliente.innerText = dados.ultimo_pronto.nome_cliente;
+            } else {
+                elSenha.innerText = '--';
+                elCliente.innerText = 'Aguardando pedidos...';
+            }
+
+            // 2. Atualizar Em Preparação
+            const elPrep = document.getElementById('lista-preparacao');
+            elPrep.innerHTML = '';
+            if (dados.em_preparacao.length === 0) {
+                elPrep.innerHTML = '<p class="text-gray-500 text-center mt-10">Nenhum pedido na fila</p>';
+            } else {
+                dados.em_preparacao.forEach(p => {
+                    elPrep.innerHTML += `
+                        <div class="bg-gray-700 p-3 rounded-lg flex justify-between items-center font-bold">
+                            <span class="text-2xl text-yellow-300">#${String(p.senha).padStart(3, '0')}</span>
+                            <span class="text-gray-300 truncate ml-2">${p.nome_cliente}</span>
+                        </div>
+                    `;
+                });
+            }
+
+            // 3. Atualizar Últimos 10 Finalizados
+            const elUltimos = document.getElementById('lista-ultimos');
+            elUltimos.innerHTML = '';
+            if (dados.ultimos_10.length === 0) {
+                elUltimos.innerHTML = '<p class="text-gray-500 text-center col-span-2 mt-10">Lista vazia</p>';
+            } else {
+                dados.ultimos_10.forEach(p => {
+                    elUltimos.innerHTML += `
+                        <div class="bg-gray-900 border border-green-800 p-3 rounded-lg text-center font-bold">
+                            <div class="text-2xl text-green-400">#${String(p.senha).padStart(3, '0')}</div>
+                            <div class="text-xs text-gray-400 truncate">${p.nome_cliente}</div>
+                        </div>
+                    `;
+                });
+            }
+        } catch (error) {
+            console.error("Erro ao buscar dados do painel:", error);
+        }
+    }
+
+    // Busca atualizações a cada 3 segundos
+    setInterval(atualizarPainel, 3000);
+    atualizarPainel(); // Chamada inicial
+</script>
+{% endblock %}
