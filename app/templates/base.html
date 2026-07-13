@@ -6,26 +6,79 @@
     <title>Gerenciador de Barraca</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 min-h-screen font-sans">
+<!-- pb-20 adicionado para o conteúdo não ficar escondido atrás da barra inferior no celular -->
+<body class="bg-gray-100 min-h-screen font-sans pb-20 md:pb-0">
     {% if session.user_id and request.endpoint != 'painel.painel_page' %}
-    <nav class="bg-indigo-700 text-white shadow-lg">
+    
+    <!-- BARRA SUPERIOR (Topo Limpo) -->
+    <nav class="bg-indigo-700 text-white shadow-lg sticky top-0 z-40">
         <div class="max-w-7xl mx-auto px-4 flex justify-between items-center h-16">
-            <div class="flex items-center space-x-4">
-                <span class="font-bold text-xl">Barraca Lanches</span>
-                <a href="{{ url_for('vendas.vendas_page') }}" class="hover:bg-indigo-600 px-3 py-2 rounded-md font-medium">Vendas (Caixa)</a>
-                <a href="{{ url_for('status.status_page') }}" class="hover:bg-indigo-600 px-3 py-2 rounded-md font-medium">Cozinha (Status)</a>
-                <a href="{{ url_for('admin.admin_page') }}" class="hover:bg-indigo-600 px-3 py-2 rounded-md font-medium">Administração</a>
+            
+            <!-- Logo / Título -->
+            <div class="flex items-center space-x-2 truncate">
+                <span class="font-black text-base sm:text-xl tracking-wide truncate">Barraca Lanches</span>
             </div>
-            <div class="flex items-center space-x-4">
-                <a href="{{ url_for('painel.painel_page') }}" target="_blank" class="bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold px-3 py-1.5 rounded text-sm">Ver Painel TV</a>
-                <span class="text-sm">Olá, <b>{{ session.user_nome }}</b></span>
-                <a href="{{ url_for('auth.logout') }}" class="bg-red-600 hover:bg-red-700 px-3 py-1 rounded text-sm">Sair</a>
+
+            <!-- Links Desktop (Escondidos no Celular: hidden md:flex) -->
+            <div class="hidden md:flex items-center space-x-2">
+                <a href="{{ url_for('vendas.vendas_page') }}" 
+                   class="{% if request.endpoint == 'vendas.vendas_page' %}bg-indigo-800 text-yellow-300 font-bold{% else %}hover:bg-indigo-600{% endif %} px-3 py-2 rounded-md transition text-sm">
+                    Vendas (Caixa)
+                </a>
+                <a href="{{ url_for('status.status_page') }}" 
+                   class="{% if request.endpoint == 'status.status_page' %}bg-indigo-800 text-yellow-300 font-bold{% else %}hover:bg-indigo-600{% endif %} px-3 py-2 rounded-md transition text-sm">
+                    Cozinha (Status)
+                </a>
+                <a href="{{ url_for('admin.admin_page') }}" 
+                   class="{% if request.endpoint == 'admin.admin_page' %}bg-indigo-800 text-yellow-300 font-bold{% else %}hover:bg-indigo-600{% endif %} px-3 py-2 rounded-md transition text-sm">
+                    Administração
+                </a>
+            </div>
+
+            <!-- Ações Rápidas (Direita) -->
+            <div class="flex items-center space-x-2 sm:space-x-4 flex-shrink-0">
+                <!-- Botão TV: Escondido em telas de celular muito pequenas -->
+                <a href="{{ url_for('painel.painel_page') }}" target="_blank" 
+                   class="hidden sm:inline-flex bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold px-2.5 py-1.5 rounded text-xs items-center gap-1 shadow">
+                    <span>Painel TV</span>
+                </a>
+                
+                <!-- Nome do usuário com corte automático se for muito grande -->
+                <span class="text-xs sm:text-sm bg-indigo-800 px-2.5 py-1 rounded-full border border-indigo-600 truncate max-w-[110px] sm:max-w-none">
+                     <b>{{ session.user_nome }}</b>
+                </span>
+                
+                <a href="{{ url_for('auth.logout') }}" 
+                   class="bg-red-600 hover:bg-red-700 font-bold px-3 py-1.5 rounded text-xs sm:text-sm transition shadow">
+                   Sair
+                </a>
             </div>
         </div>
     </nav>
+
+    <!-- BARRA INFERIOR MOBILE (Bottom Tab Bar - Aparece Apenas no Celular: md:hidden) -->
+    <div class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-[0_-4px_10px_rgba(0,0,0,0.05)] z-50 flex justify-around items-center h-16 text-2xs select-none">
+        <a href="{{ url_for('vendas.vendas_page') }}" 
+           class="flex flex-col items-center justify-center w-full h-full {% if request.endpoint == 'vendas.vendas_page' %}text-indigo-600 font-bold border-t-2 border-indigo-600 bg-indigo-50/50{% else %}text-gray-500 hover:text-indigo-600{% endif %}">
+            <span class="text-[12px]">Caixa</span>
+        </a>
+        <a href="{{ url_for('status.status_page') }}" 
+           class="flex flex-col items-center justify-center w-full h-full {% if request.endpoint == 'status.status_page' %}text-indigo-600 font-bold border-t-2 border-indigo-600 bg-indigo-50/50{% else %}text-gray-500 hover:text-indigo-600{% endif %}">
+            <span class="text-[12px]">Cozinha</span>
+        </a>
+        <a href="{{ url_for('admin.admin_page') }}" 
+           class="flex flex-col items-center justify-center w-full h-full {% if request.endpoint == 'admin.admin_page' %}text-indigo-600 font-bold border-t-2 border-indigo-600 bg-indigo-50/50{% else %}text-gray-500 hover:text-indigo-600{% endif %}">
+            <span class="text-[12px]">Admin</span>
+        </a>
+        <a href="{{ url_for('painel.painel_page') }}" target="_blank" 
+           class="flex flex-col items-center justify-center w-full h-full text-gray-500 hover:text-yellow-600">
+            <span class="text-[12px]">TV</span>
+        </a>
+    </div>
     {% endif %}
 
-    <main class="{% if request.endpoint != 'painel.painel_page' %}max-w-7xl mx-auto py-6 px-4{% endif %}">
+    <!-- Espaçamento lateral reduzido de px-4 para px-2.5 no celular para ganhar área útil -->
+    <main class="{% if request.endpoint != 'painel.painel_page' %}max-w-7xl mx-auto py-4 px-2.5 sm:py-6 sm:px-4{% endif %}">
         {% block content %}{% endblock %}
     </main>
 </body>
