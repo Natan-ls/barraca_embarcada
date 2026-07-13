@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciador de Barraca</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen font-sans">
+    {% if session.user_id and request.endpoint != 'painel.painel_page' %}
+    <nav class="bg-indigo-700 text-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 flex justify-between items-center h-16">
+            <div class="flex items-center space-x-4">
+                <span class="font-bold text-xl">Barraca Lanches</span>
+                <a href="{{ url_for('vendas.vendas_page') }}" class="hover:bg-indigo-600 px-3 py-2 rounded-md font-medium">Vendas (Caixa)</a>
+                <a href="{{ url_for('status.status_page') }}" class="hover:bg-indigo-600 px-3 py-2 rounded-md font-medium">Cozinha (Status)</a>
+                <a href="{{ url_for('admin.admin_page') }}" class="hover:bg-indigo-600 px-3 py-2 rounded-md font-medium">Administração</a>
+            </div>
+            <div class="flex items-center space-x-4">
+                <a href="{{ url_for('painel.painel_page') }}" target="_blank" class="bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold px-3 py-1.5 rounded text-sm">Ver Painel TV</a>
+                <span class="text-sm">Olá, <b>{{ session.user_nome }}</b></span>
+                <a href="{{ url_for('auth.logout') }}" class="bg-red-600 hover:bg-red-700 px-3 py-1 rounded text-sm">Sair</a>
+            </div>
+        </div>
+    </nav>
+    {% endif %}
+
+    <main class="{% if request.endpoint != 'painel.painel_page' %}max-w-7xl mx-auto py-6 px-4{% endif %}">
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>
