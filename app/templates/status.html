@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="mb-6 flex justify-between items-center">
+    <div>
+        <h1 class="text-3xl font-extrabold text-gray-800"> Controle de Preparo e Entrega</h1>
+        <p class="text-sm text-gray-500">Altere o status para atualizar a TV Box instantaneamente</p>
+    </div>
+    <a href="{{ url_for('status.status_page') }}" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded inline-flex items-center text-sm shadow">
+        Atualizar Tela
+    </a>
+</div>
+
+<!-- Kanban das 3 Etapas Ativas -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    
+    <!-- COLUNA 1: CRIADOS (Novos Pedidos) -->
+    <div class="bg-red-50 rounded-lg p-4 border border-red-200">
+        <h2 class="font-bold text-lg text-red-800 border-b border-red-200 pb-2 mb-4 flex justify-between">
+            <span>1. Novos / Fila</span>
+        </h2>
+        <div class="space-y-4">
+            {% for p in pedidos if p.status == 'Criado' %}
+            <div class="bg-white p-4 rounded shadow border-l-4 border-red-500">
+                <div class="flex justify-between items-start mb-2">
+                    <span class="text-2xl font-black text-gray-800">#{{ "%03d"|format(p.senha) }}</span>
+                    <span class="text-xs bg-gray-100 px-2 py-1 rounded font-bold">{{ p.nome_cliente }}</span>
+                </div>
+                <ul class="text-sm text-gray-600 mb-4 divide-y">
+                    {% for i in p.itens %}
+                    <li class="py-1"><b>{{ i.quantidade }}x</b> {{ i.nome }}</li>
+                    {% endfor %}
+                </ul>
+                <!-- Tag url_for corrigida aqui -->
+                <a href="{{ url_for('status.mudar_status', pedido_id=p.id, novo_status='em_preparacao') }}" 
+                   class="block text-center w-full bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 rounded text-sm transition">
+                     Iniciar Preparo ➜
+                </a>
+            </div>
+            {% else %}
+            <p class="text-sm text-gray-400 text-center py-4">Nenhum pedido aguardando na fila</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- COLUNA 2: EM PREPARAÇÃO -->
+    <div class="bg-yellow-50 rounded-lg p-4 border border-yellow-200">
+        <h2 class="font-bold text-lg text-yellow-800 border-b border-yellow-200 pb-2 mb-4 flex justify-between">
+            <span>2. Em Preparo (Na TV)</span>
+        </h2>
+        <div class="space-y-4">
+            {% for p in pedidos if p.status == 'em_preparacao' %}
+            <div class="bg-white p-4 rounded shadow border-l-4 border-yellow-500">
+                <div class="flex justify-between items-start mb-2">
+                    <span class="text-2xl font-black text-gray-800">#{{ "%03d"|format(p.senha) }}</span>
+                    <span class="text-xs bg-gray-100 px-2 py-1 rounded font-bold">{{ p.nome_cliente }}</span>
+                </div>
+                <ul class="text-sm text-gray-600 mb-4 divide-y">
+                    {% for i in p.itens %}
+                    <li class="py-1"><b>{{ i.quantidade }}x</b> {{ i.nome }}</li>
+                    {% endfor %}
+                </ul>
+                <!-- Tag url_for corrigida aqui -->
+                <a href="{{ url_for('status.mudar_status', pedido_id=p.id, novo_status='finalizado') }}" 
+                   class="block text-center w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 rounded text-sm transition">
+                    ✔ Marcar como PRONTO!
+                </a>
+            </div>
+            {% else %}
+            <p class="text-sm text-gray-400 text-center py-4">Nenhum pedido sendo preparado</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- COLUNA 3: FINALIZADOS (Prontos na TV) -->
+    <div class="bg-green-50 rounded-lg p-4 border border-green-200">
+        <h2 class="font-bold text-lg text-green-800 border-b border-green-200 pb-2 mb-4 flex justify-between">
+            <span>3. Prontos para Retirar</span>
+        </h2>
+        <div class="space-y-4">
+            {% for p in pedidos if p.status == 'finalizado' %}
+            <div class="bg-white p-4 rounded shadow border-l-4 border-green-500 opacity-90">
+                <div class="flex justify-between items-start mb-2">
+                    <span class="text-2xl font-black text-green-700">#{{ "%03d"|format(p.senha) }}</span>
+                    <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded font-bold">{{ p.nome_cliente }}</span>
+                </div>
+                <ul class="text-sm text-gray-600 mb-4 divide-y">
+                    {% for i in p.itens %}
+                    <li class="py-1"><b>{{ i.quantidade }}x</b> {{ i.nome }}</li>
+                    {% endfor %}
+                </ul>
+                <!-- Tag url_for corrigida aqui -->
+                <a href="{{ url_for('status.mudar_status', pedido_id=p.id, novo_status='entregue') }}" 
+                   class="block text-center w-full bg-gray-700 hover:bg-gray-800 text-white font-bold py-2 rounded text-sm transition">
+                    Pedido Entregue ao Cliente
+                </a>
+            </div>
+            {% else %}
+            <p class="text-sm text-gray-400 text-center py-4">Nenhum pedido aguardando retirada</p>
+            {% endfor %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}
